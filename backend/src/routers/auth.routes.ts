@@ -25,5 +25,21 @@ router
         validateRequest,
         AuthController.signUp
     )
+    .post('/signin',
+        [
+            body('email').trim().escape().isEmail().withMessage("Invalid email or password"),
+            body('password')
+                .trim()
+                .isStrongPassword({
+                    minLength: 8,
+                    minLowercase: 1,
+                    minUppercase: 1,
+                    minNumbers: 1,
+                    minSymbols: 1
+                }).withMessage("Invalide email or password"),
+        ],
+        validateRequest,
+        AuthController.signIn
+    )
 
 export { router as authRouter };
