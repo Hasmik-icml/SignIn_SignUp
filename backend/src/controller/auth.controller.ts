@@ -13,7 +13,7 @@ export class AuthController {
             if (error instanceof CustomError) {
                 res.status(error.statusCode).send({ errors: error.serializeErrors() });
             } else {
-                res.status(400).send({ message: 'Something went wrong' });
+                res.status(500).send({ message: 'Something went wrong' });
             }
         }
     }
@@ -38,7 +38,7 @@ export class AuthController {
             if (error instanceof CustomError) {
                 res.status(error.statusCode).send({ errors: error.serializeErrors() });
             } else {
-                res.status(400).send({ message: 'Something went wrong' });
+                res.status(500).send({ message: 'Something went wrong' });
             }
         }
     }
@@ -61,7 +61,7 @@ export class AuthController {
                     path: '/',
                     maxAge: 1 * 24 * 60 * 60 * 1000
                 })
-                res.status(200).send({accessToken: token?.accessToken});
+                res.status(200).send({ accessToken: token?.accessToken });
             } else {
                 res.status(401).json({ message: 'Invalid email or password' });
             }
@@ -69,9 +69,32 @@ export class AuthController {
             if (error instanceof CustomError) {
                 res.status(error.statusCode).send({ errors: error.serializeErrors() });
             } else {
-                res.status(400).send({ message: 'Something went wrong' });
+                res.status(500).send({ message: 'Something went wrong' });
             }
         }
     }
 
+    public static async signOut(req: Request, res: Response): Promise<void> {
+        const refreshToken = req.cookies.refreshToken;
+
+        if (!refreshToken) {
+            res.status(400).json({ message: 'Refresh token not provided' });
+        }
+
+        try {
+            const msg = await AuthService.signOut(refreshToken);
+            if (msg) {
+                res.clearCookie('refreshToken', { httpOnly: true });
+                res.status(200).json({ message: "Successfully logged out" });
+            } else {
+                res.status(400).send({ message: 'Something went wrong' });
+            }
+        } catch (error) {
+            if (error instanceof CustomError) {
+                res.status(error.statusCode).send({ errors: error.serializeErrors() });
+            } else {
+                res.status(500).send({ message: 'Something went wrong' });
+            }
+        }
+    }
 }

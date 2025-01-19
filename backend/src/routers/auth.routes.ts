@@ -3,7 +3,7 @@ import { body } from "express-validator";
 import { validateRequest } from "../middleware/validation.middleware";
 import { AuthController } from "../controller/auth.controller";
 
-const   router: Router = Router();
+const router: Router = Router();
 
 router
     .post('/signup',
@@ -41,6 +41,7 @@ router
         validateRequest,
         AuthController.signIn
     )
+    .post('/signout', AuthController.signOut)
     .post('/refresh-token', AuthController.refreshToken)
 
 export { router as authRouter };

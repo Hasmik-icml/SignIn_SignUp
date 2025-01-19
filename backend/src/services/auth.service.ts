@@ -140,4 +140,32 @@ export class AuthService {
 
         return { accessToken, refreshToken: newRefreshToken };
     }
+
+    public static async signOut(refreshToken: string): Promise<{ message: string }> {
+        const decoded = jwt.verify(refreshToken, refreshKey!) as JwtPayload;
+        const user = await this.userRepo.findOne({
+            where: { id: decoded.userId },
+        })
+
+        if (!user) {
+            throw Error('User not found');
+        }
+
+        const tokenExists = await this.tokensRepo.findOne({
+            where: {
+                user: { id: Number(user.id) },
+                refreshToken,
+            }
+        });
+
+        if (!tokenExists) {
+            throw new Error('Invalid Refresh Token');
+        }
+
+        this.tokensRepo.delete({
+            user: { id: user.id },
+        });
+        
+        return { message: 'Successfully logged out' };
+    }
 }
