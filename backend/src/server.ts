@@ -2,6 +2,7 @@ import express, {Request, Response} from "express";
 import { AppDataSource } from "./database.config";
 import { router } from "./routers";
 import  cors from "cors";
+import cookieParser from "cookie-parser";
  
 const app = express();
 const port = 3000;
@@ -11,6 +12,7 @@ app.use(cors({
     origin: process.env.API_URL,
     credentials: true,
 }));
+app.use(cookieParser());
 
 AppDataSource.initialize()
     .then(() => {

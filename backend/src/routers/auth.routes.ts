@@ -41,5 +41,6 @@ router
         validateRequest,
         AuthController.signIn
     )
+    .post('/refresh-token', AuthController.refreshToken)
 
 export { router as authRouter };

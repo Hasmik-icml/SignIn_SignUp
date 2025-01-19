@@ -3,7 +3,7 @@ import { AppDataSource } from "../database.config";
 import { Users } from "../entities/Users";
 import { BadRequestError } from "../handlers/bad-request.handler";
 import { Tokens } from "../entities/Tokens";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { Repository } from "typeorm";
 
 export interface IUser {
@@ -96,5 +96,48 @@ export class AuthService {
         return { accessToken, refreshToken };
     }
 
+    public static async refreshToken(refreshToken: string): Promise<ITokens | undefined> {
+        const decoded = jwt.verify(refreshToken, refreshKey!) as JwtPayload;
+        const user = await this.userRepo.findOne({
+            where: { id: decoded.userId },
+        })
+
+        if (!user) {
+            throw Error('User not found');
+        }
+
+        const tokenExists = await this.tokensRepo.findOne({
+            where: {
+                user: { id: Number(user.id) },
+                refreshToken,
+            }
+        });
+
+        if (!tokenExists) {
+            throw new Error('Invalid Refresh Token');
+        }
+
+        this.tokensRepo.delete({
+            user: { id: user.id },
+        });
+
+        const accessToken = jwt.sign(
+            { userId: user.id, email: user.email },
+            secretKey!,
+            { expiresIn: '15m' }
+        )
+
+        const newRefreshToken = jwt.sign(
+            { userId: user.id, email: user.email },
+            refreshKey!,
+            { expiresIn: '1d' }
+        )
+
+        this.tokensRepo.save({
+            user: { id: user.id },
+            refreshToken: refreshToken,
+        });
+
+        return { accessToken, refreshToken: newRefreshToken };
     }
 }
