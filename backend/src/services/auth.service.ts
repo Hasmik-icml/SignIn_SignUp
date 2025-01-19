@@ -71,7 +71,6 @@ export class AuthService {
 
         if (!validPassword) {
             throw new BadRequestError("Invalid email or password");
-
         }
 
         this.tokensRepo.delete({
@@ -165,7 +164,40 @@ export class AuthService {
         this.tokensRepo.delete({
             user: { id: user.id },
         });
-        
+
         return { message: 'Successfully logged out' };
+    }
+
+    public static async getAll(): Promise<[data: Users[], count: number]> {
+        const [data, count] = await this.userRepo.findAndCount({});
+
+        return [data, count];
+    }
+
+    public static async getOne(userId: number): Promise<Users> {
+        const data = await this.userRepo.findOneOrFail({ where: { id: Number(userId) } });
+
+        return data;
+    }
+
+    public static async update(email: string, userId: number): Promise<Users | null> {
+        await this.userRepo.update(
+            { id: Number(userId) },
+            { email }
+        );
+
+        const updatedUser = await this.userRepo.findOne({ where: { id: Number(userId) } });
+
+        return updatedUser;
+    }
+
+    public static async delete(id: number): Promise<Users> {
+        const existingUser = await this.userRepo.findOneOrFail({ where: { id } });
+        if (existingUser) {
+            this.userRepo.softDelete(
+                { id },
+            );
+        }
+        return existingUser;
     }
 }

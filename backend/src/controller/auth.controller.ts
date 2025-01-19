@@ -97,4 +97,61 @@ export class AuthController {
             }
         }
     }
+
+    public static async getAllUsers(req: Request, res: Response): Promise<void> {
+        try {
+            const [data, count] = await AuthService.getAll();
+            res.status(200).send({ data, count });
+        } catch (error) {
+            if (error instanceof CustomError) {
+                res.status(error.statusCode).send({ errors: error.serializeErrors() });
+            } else {
+                res.status(500).send({ message: 'Something went wrong' });
+            }
+        }
+    }
+
+    public static async getById(req: Request, res: Response): Promise<void> {
+        const userId = Number(req.params.id);
+        console.log(555, userId);
+        try {
+            const user = await AuthService.getOne(userId);
+            res.status(200).send({ data: user });
+        } catch (error) {
+            if (error instanceof CustomError) {
+                res.status(error.statusCode).send({ errors: error.serializeErrors() });
+            } else {
+                res.status(500).send({ message: 'Something went wrong' });
+            }
+        }
+    }
+
+    public static async updateUser(req: Request, res: Response): Promise<void> {
+        const userId = Number(req.params.id);
+        const email = req.body.email;
+        try {
+            const user = await AuthService.update(email, userId);
+            res.status(200).send({ data: user });
+        } catch (error) {
+            if (error instanceof CustomError) {
+                res.status(error.statusCode).send({ errors: error.serializeErrors() });
+            } else {
+                res.status(500).send({ message: 'Something went wrong' });
+            }
+        }
+    }
+
+    public static async deleteUser(req: Request, res: Response): Promise<void> {
+        const userId = (req as any).userId;
+        try {
+            const user = await AuthService.delete(userId);
+            res.status(200).send({ data: user });
+        } catch (error) {
+            if (error instanceof CustomError) {
+                res.status(error.statusCode).send({ errors: error.serializeErrors() });
+            } else {
+                res.status(500).send({ message: 'Something went wrong' });
+            }
+        }
+    }
 }

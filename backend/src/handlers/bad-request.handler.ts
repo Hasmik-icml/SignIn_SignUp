@@ -1,4 +1,3 @@
-import { ValidationError } from "express-validator";
 import { CustomError } from "../errors/custom.error";
 
 export class BadRequestError extends CustomError {

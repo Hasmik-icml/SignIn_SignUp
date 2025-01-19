@@ -43,5 +43,4 @@ router
     )
     .post('/signout', AuthController.signOut)
     .post('/refresh-token', AuthController.refreshToken)
-
 export { router as authRouter };
