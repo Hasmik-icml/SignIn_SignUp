@@ -59,7 +59,6 @@ export class AuthService {
     }
 
     public static async signIn(email: string, password: string): Promise<ITokens> {
-
         const user = await this.userRepo.findOne({
             where: { email },
         });
@@ -75,23 +74,23 @@ export class AuthService {
 
         }
 
-        const r = this.tokensRepo.delete({
-            user: user,
+        this.tokensRepo.delete({
+            user: { id: user.id },
         });
-        console.log(r);
+
         const accessToken = jwt.sign(
-            { user },
+            { userId: user.id, email: user.email },
             secretKey!,
             { expiresIn: '15m' }
         )
         const refreshToken = jwt.sign(
-            { user },
+            { userId: user.id, email: user.email },
             refreshKey!,
             { expiresIn: '1d' }
         )
 
         this.tokensRepo.save({
-            userid: user.id,
+            user: { id: user.id },
             refreshToken: refreshToken,
         });
         return { accessToken, refreshToken };
